@@ -1,5 +1,13 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, QFileDialog, QPushButton, QVBoxLayout, QWidget
+from PyQt5.QtGui import QPainter, QPen
+from PyQt5.QtCore import  Qt, QPoint
+
+class Canvas(QWidget):
+  def __init__(self):
+    super().__init__()
+    self.start_point = None #Start point of the line
+    self.end_point = None #End point of the line
 
 class MainWindow(QMainWindow):
   def __init__(self):
