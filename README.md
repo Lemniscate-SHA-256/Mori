@@ -1,4 +1,4 @@
-# Mori
+# Mori 森
 
 Mori is more than a software for drawing, designing, calculating and systematizing biomimicry and bioarchitectural projects. It is more than a dream, it makes people think about the wonders of advanced, safe, revolutionary natural mechanisms and ways of dealing with them.
 
