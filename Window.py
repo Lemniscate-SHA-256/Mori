@@ -1,6 +1,6 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, QFileDialog, QPushButton, QVBoxLayout, QWidget
-from PyQt5.QtGui import QPainter, QPen
+from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, QFileDialog, QPushButton, QVBoxLayout, QWidget, QColorDialog, QSlider, QLabel
+from PyQt5.QtGui import QPainter, QPen, QBrush
 from PyQt5.QtCore import  Qt, QPoint
 
 class Canvas(QWidget):
@@ -8,17 +8,40 @@ class Canvas(QWidget):
     super().__init__()
     self.start_point = None #Start point of the line
     self.end_point = None #End point of the line
+    self.current_points = [] #For freeform drawing
     self.lines = [] #To store drawn lines (each as a tuple of start and end points)
+    self.pen_color = Qt.black #Default color
+    self.pen_thickness = 3 #Default pen thickness
+    self.drawing_mode = 'line' #Defaukt drawing mode (line, freeform, rectangle, circle)
   def paintEvent(self, event):
     #Method called whenever the widget needs to be updated
     painter = QPainter(self)
-    pen = QPen(Qt.black, 3, Qt.SolidLine)
-    painter.setPen(pen)
-    #Draw all the previously stored lines
-    for lines in self.lines:
-      painter.drawLine(lines[0], lines[1])
-    #If the user is currently drawing a line, we draw it as well
+    
+    #Draw all stored shapes/lines
+    for shape in self.lines:
+      if shape['type'] == 'line':
+        self.draw_line(painter, shape)
+      elif shape['type'] == 'freeform':
+        self.draw_freeform(painter, shape)
+      elif shape['type'] == 'rectangle':
+        self.draw_rectangle(painter, shape)
+      elif shape['type'] == 'circle':
+              self.draw_circle(painter, shape)
+
+    #Draw the shape being actively drawn
     if self.start_point and self.end_point:
+      if self.drawing_mode == 'line':
+        self.draw_line(painter, {'start': self.start_point, 'end': self.end_point, 'color': self.pen_color, 'thickness': self.pen_thickness })
+      elif self.drawing_mode == 'rectangle':
+        self.draw_rectangle(painter, {'start': self.start_point, 'end': self.end_point, 'color': self.pen_color, 'thickness': self.pen_thickness })
+      elif self.drawing_mode == 'circle':
+        self.draw_circle(painter, {'start': self.start_point, 'end': self.end_point, 'color': self.pen_color, 'thickness': self.pen_thickness })
+    
+    #If the user is currently drawing a shape, we draw it as well
+    if self.start_point and self.end_point:
+      painter.drawLine(self.start_point, self.end_point)
+      pen = QPen(self.pen_color, self.pen_thickness, Qt.SolidLine)
+      painter.setPen(pen)
       painter.drawLine(self.start_point, self.end_point)
   def mousePressEvent(self, event):
     #When the mouse button is pressed, whe start drawing a new line
@@ -34,10 +57,16 @@ class Canvas(QWidget):
     #When the mouse button is released, finalize the line and store it
     if event.button() == Qt.LeftButton:
       self.end_point = event.pos()
-      self.lines.append((self.start_point, self.end_point)) #Store the line
+      self.lines.append((self.start_point, self.end_point, self.pen_color, self.pen_thickness)) #Store the line
       self.start_point = None
       self.end_point = None
       self.update() #Updating the canvas
+  #Function to set the pen color
+  def set_pen_color(self, color):
+    self.pen_color = color
+  def set_pen_thickness(self, thickness):
+    print(f"Pen thickness set to : {thickness}")  #Debugging : Print to check
+    self.pen_thickness = thickness
 class MainWindow(QMainWindow):
   def __init__(self):
     super().__init__()
@@ -68,11 +97,24 @@ class MainWindow(QMainWindow):
     #Creating a button for clearing the canvas
     clear_button = QPushButton("Clear Canvas", self)
     clear_button.clicked.connect(self.clear_canvas)
+    #Creatin a button for the color picker
+    color_button = QPushButton("Pick Color", self)
+    color_button.clicked.connect(self.pick_color)
+    #Creating a slider for adjusting the line thickness
+    thickness_slider = QSlider(Qt.Horizontal, self)
+    thickness_slider.setRange(1, 10) #Line thickness between 1 and 10
+    thickness_slider.setValue(3) #Default value
+    thickness_slider.valueChanged.connect(self.change_thickness)
+    #Creating a label for the slider
+    slider_label = QLabel("Line thickness", self)
     #Create a layout and add the button, the canvas
     layout = QVBoxLayout()
     layout.addWidget(new_design_button)
     layout.addWidget(self.canvas)
     layout.addWidget(clear_button)
+    layout.addWidget(color_button)
+    layout.addWidget(thickness_slider)
+    layout.addWidget(slider_label)
     #create a central widget, set the layout, and assign it to the main window
     container = QWidget()
     container.setLayout(layout)
@@ -80,6 +122,15 @@ class MainWindow(QMainWindow):
   def start_new_design(self):
       # function that get called when the button is clicked
       print("Starting a new Design")
+  def pick_color(self):
+    #Open a color dialog and let the user select the color
+    color = QColorDialog.getColor()
+    if color.isValid():
+      self.canvas.set_pen_color(color)  #Set the chosen color to the canvas
+  def change_thickness(self, value):
+    #Change the pen thickness when the slider is adjusted
+    print(f"Changing line thickness to {value}")
+    self.canvas.set_pen_thickness(value)
   def open_file_dialog(self):
     options = QFileDialog.Options()
     file_name , _ = QFileDialog.getOpenFileName(self, "Open Design File", "", "All Files (*);;Design Files (*.des)", options=options)
