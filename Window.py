@@ -38,16 +38,14 @@ class Canvas(QWidget):
         self.draw_circle(painter, {'start': self.start_point, 'end': self.end_point, 'color': self.pen_color, 'thickness': self.pen_thickness })
     
     #If the user is currently drawing a shape, we draw it as well
-    if self.start_point and self.end_point:
-      painter.drawLine(self.start_point, self.end_point)
-      pen = QPen(self.pen_color, self.pen_thickness, Qt.SolidLine)
-      painter.setPen(pen)
-      painter.drawLine(self.start_point, self.end_point)
-  def mousePressEvent(self, event):
-    #When the mouse button is pressed, whe start drawing a new line
-    if event.button() == Qt.LeftButton:
-      self.start_point = event.pos()
-      self.end_point = self.start_point
+    if self.current_points:
+      self.draw_freeform(painter, {'points': self.current_points, 'color': self.pen_color, 'thickness': self.pen_thickness})
+    
+  def draw_line(self, painter, shape):
+    pen = QPen(shape['color'], shape['thickness'], Qt.Solidline)  
+    painter.setPen(pen)
+    painter.drawLine(shape['start'], shape['end'])
+  
   def mouseMoveEvent(self, event):
     #When the mouse is moved while pressed, update the end point of the current line
     if self.start_point:
