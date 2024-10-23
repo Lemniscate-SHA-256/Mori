@@ -45,6 +45,8 @@ class Canvas(QWidget):
     pen = QPen(shape['color'], shape['thickness'], Qt.Solidline)  
     painter.setPen(pen)
     painter.drawLine(shape['start'], shape['end'])
+
+  
   
   def mouseMoveEvent(self, event):
     #When the mouse is moved while pressed, update the end point of the current line
