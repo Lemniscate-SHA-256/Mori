@@ -42,9 +42,15 @@ class Canvas(QWidget):
       self.draw_freeform(painter, {'points': self.current_points, 'color': self.pen_color, 'thickness': self.pen_thickness})
     
   def draw_line(self, painter, shape):
-    pen = QPen(shape['color'], shape['thickness'], Qt.Solidline)  
+    pen = QPen(shape['color'], shape['thickness'], Qt.SolidLine)  
     painter.setPen(pen)
     painter.drawLine(shape['start'], shape['end'])
+
+  def draw_freeform(self, painter, shape):
+    pen = Qpen(shape['color'], shape['thcikness'], Qt.SolidLine)
+    painter.setPen(pen)
+    for i in range(1, len(shape['points'])):
+      painter.draw_line(shape['points'][i - 1], shape['points'][i])
 
   def draw_circle(self, painter, shape):
         pen = QPen(shape['color'], shape['thickness'], Qt.SolidLine)
