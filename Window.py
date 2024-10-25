@@ -71,6 +71,12 @@ class Canvas(QWidget):
     center = start
     radius = int((end.x() - start.x()) ** 2 + (end.y() - start.y() ** 2) ** 0,5)
     retun(center, radius)
+
+  def mousePressEvent(self, event):
+    if event.button() == Qt.LeftButton:
+      self.start_point = event.pos()
+      if self.drawing_mode == 'freedom'
+        self.current_points.append(self.start_point) 
   
   def mouseMoveEvent(self, event):
     #When the mouse is moved while pressed, update the end point of the current line
