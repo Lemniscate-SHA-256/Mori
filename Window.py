@@ -52,11 +52,25 @@ class Canvas(QWidget):
     for i in range(1, len(shape['points'])):
       painter.draw_line(shape['points'][i - 1], shape['points'][i])
 
+  def draw_rectangle(self, painter, shape)
+    pen = QPen(shape['color'], shape['thickness'], Qt.SolidLine)
+    painter.setPen(pen)
+    rect = self.get_rect(shape['start'], shape['end'])
+    painter.drawRect(rect)
+
   def draw_circle(self, painter, shape):
         pen = QPen(shape['color'], shape['thickness'], Qt.SolidLine)
         painter.setPen(pen)
         center, radius = self.get_circle(shape['start'], shape['end'])
         painter.drawEllipse(center, radius, radius)
+
+  def get_rect(self, start, end):
+    return QRect(start, end)
+
+  def get_circle(self, start, end):
+    center = start
+    radius = int((end.x() - start.x()) ** 2 + (end.y() - start.y() ** 2) ** 0,5)
+    retun(center, radius)
   
   def mouseMoveEvent(self, event):
     #When the mouse is moved while pressed, update the end point of the current line
