@@ -13,5 +13,9 @@
 - Adding function for getting the circle
 - Modify Mouse Press Event
 
+26/10
+- Add mouseMoveEvent to Track Mouse Movement
+- Add mouseReleaseEvent to Finalize the Shape (Mori)
+
 
 

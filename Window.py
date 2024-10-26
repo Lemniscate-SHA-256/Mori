@@ -13,6 +13,7 @@ class Canvas(QWidget):
     self.pen_color = Qt.black #Default color
     self.pen_thickness = 3 #Default pen thickness
     self.drawing_mode = 'line' #Defaukt drawing mode (line, freeform, rectangle, circle)
+  
   def paintEvent(self, event):
     #Method called whenever the widget needs to be updated
     painter = QPainter(self)
@@ -79,24 +80,38 @@ class Canvas(QWidget):
         self.current_points.append(self.start_point) 
   
   def mouseMoveEvent(self, event):
-    #When the mouse is moved while pressed, update the end point of the current line
     if self.start_point:
-      self.end_point = event.pos()
-      self.update() #Update the canvas to reflect the changes
+      if self.drawing_mode == 'freeform':
+        self.current_points.append(event.pos())
+      else:
+        self.end_point = event.pos()
+      self.update
+
   def mouseReleaseEvent(self, event):
     #When the mouse button is released, finalize the line and store it
-    if event.button() == Qt.LeftButton:
-      self.end_point = event.pos()
-      self.lines.append((self.start_point, self.end_point, self.pen_color, self.pen_thickness)) #Store the line
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            if self.drawing_mode == 'freeform':
+                self.lines.append({'type': 'freeform', 'points': self.current_points, 'color': self.pen_color, 'thickness': self.pen_thickness})
+                self.current_points = []
+            elif self.drawing_mode == 'line':
+                self.lines.append({'type': 'line', 'start': self.start_point, 'end': self.end_point, 'color': self.pen_color, 'thickness': self.pen_thickness})
+            elif self.drawing_mode == 'rectangle':
+                self.lines.append({'type': 'rectangle', 'start': self.start_point, 'end': self.end_point, 'color': self.pen_color, 'thickness': self.pen_thickness})
+            elif self.drawing_mode == 'circle':
+                self.lines.append({'type': 'circle', 'start': self.start_point, 'end': self.end_point, 'color': self.pen_color, 'thickness': self.pen_thickness})
       self.start_point = None
       self.end_point = None
       self.update() #Updating the canvas
+
   #Function to set the pen color
   def set_pen_color(self, color):
     self.pen_color = color
+
   def set_pen_thickness(self, thickness):
     print(f"Pen thickness set to : {thickness}")  #Debugging : Print to check
     self.pen_thickness = thickness
+
 class MainWindow(QMainWindow):
   def __init__(self):
     super().__init__()
@@ -105,6 +120,7 @@ class MainWindow(QMainWindow):
     self.create_menu_bar()
     # creating the main layout and adding a button
     self.init_ui()
+
   def create_menu_bar(self):
     menu_bar = self.menuBar()
     file_menu = menu_bar.addMenu("File")
@@ -118,6 +134,7 @@ class MainWindow(QMainWindow):
     file_menu.addAction(open_action)
     file_menu.addAction(save_action)
     file_menu.addAction(exit_action)
+
   def init_ui(self):
     #Creating the canvas widget
     self.canvas = Canvas()
@@ -149,28 +166,34 @@ class MainWindow(QMainWindow):
     container = QWidget()
     container.setLayout(layout)
     self.setCentralWidget(container)
+
   def start_new_design(self):
       # function that get called when the button is clicked
       print("Starting a new Design")
+
   def pick_color(self):
     #Open a color dialog and let the user select the color
     color = QColorDialog.getColor()
     if color.isValid():
       self.canvas.set_pen_color(color)  #Set the chosen color to the canvas
+
   def change_thickness(self, value):
     #Change the pen thickness when the slider is adjusted
     print(f"Changing line thickness to {value}")
     self.canvas.set_pen_thickness(value)
+
   def open_file_dialog(self):
     options = QFileDialog.Options()
     file_name , _ = QFileDialog.getOpenFileName(self, "Open Design File", "", "All Files (*);;Design Files (*.des)", options=options)
     if file_name:
       print(f"Opening file: {file_name}")
+
   def save_file_dialog(self):
     options = QFileDialog.Options()
     file_name , _ = QFileDialog.getSaveFileName(self, "Save Design File", "", "All Files (*);;Design Files (* .des)", options=options)
     if file_name:
       print(f"Saving file: {file_name}")
+
   def clear_canvas(self):
     #Function to clear canvas
     self.canvas.lines = []
@@ -179,9 +202,12 @@ class MainWindow(QMainWindow):
 
 #Initialization of the application
 app = QApplication(sys.argv)
+
 #Creating instance of the main window
 window = MainWindow()
+
 #Show the window
 window.show()
+
 #Execute the application loop
 sys.exit(app.exec_())
